@@ -1,0 +1,16 @@
+{
+  "name": "valet",
+  "module": "ui/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@shoelace-style/shoelace": "^2.15.1",
+    "firebase": "^10.12.4",
+    "lit": "^3.1.4"
+  }
+}

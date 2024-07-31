@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-GB">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+  {% block headline %}
+  <title>Valet</title>
+  {% endblock %}
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/ui/style.css" />
+
+  <link rel="stylesheet" media="none" href="/ui/shoelace.light.css" onload="media='(prefers-color-scheme:light)'" />
+  <link rel="stylesheet" media="none" href="/ui/shoelace.dark.css"
+    onload="media='(prefers-color-scheme:dark)'; document.documentElement.classList.add('sl-theme-dark');" />
+
+  <meta name="theme-color" content="#030303">
+
+  {% block script %}
+  <script src="/ui/index.js" type="module"></script>
+  <script src="/ui/async.js" type="module" async></script>
+  {% endblock %}
+</head>
+
+<body>
+
+  {% if account %}
+  <activity-auth data-account="{{account}}"></activity-auth>
+  {% else %}
+  <activity-auth></activity-auth>
+  {% endif %}
+
+  {% block body %}
+  <header class="hero">
+    <div class="stack">
+      <h1 class="headline">Valet</h1>
+      <div class="supporting-text">Hyper Intelligent Media Server</div>
+      <activity-search>
+        <form action="." method="get">
+          <input autocomplete="off" autocapitalize="off" type="search" placeholder="Search"> <button aria-label="Submit"
+            type="submit"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+              fill="#5f6368">
+              <path
+                d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+            </svg></button>
+        </form>
+      </activity-search>
+    </div>
+  </header>
+
+  <hr>
+
+  <main>
+    <section class="stack">
+      <h2>Favorites</h2>
+
+      <activity-card href="/collections/michelin-star">
+        <div slot="headline">Michelin Star Restaurants</div>
+        <div slot="supporting-text">The very top Chicago restaurants, divined upon us by a tire company</div>
+      </activity-card>
+      <activity-card href="/collections/food-deserts">
+        <div slot="headline">Food Deserts</div>
+        <div slot="supporting-text">Areas with limited access to affordable or nutritious food</div>
+      </activity-card>
+    </section>
+
+    <section class="stack">
+      <h2>Recent</h2>
+
+      <activity-card href="/collections/michelin-star">
+        <div slot="headline">Michelin Star Restaurants</div>
+        <div slot="supporting-text">The very top Chicago restaurants, divined upon us by a tire company</div>
+      </activity-card>
+      <activity-card href="/collections/food-deserts">
+        <div slot="headline">Food Deserts</div>
+        <div slot="supporting-text">Areas with limited access to affordable or nutritious food</div>
+      </activity-card>
+    </section>
+
+  </main>
+  {% endblock %}
