@@ -56,6 +56,7 @@ export class ActivityAuth extends LitElement {
     super.connectedCallback();
     if (this.dataset.account) {
       this.account = JSON.parse(atob(this.dataset.account));
+      console.log('signed in as', this.account);
     }
   }
 
@@ -75,7 +76,6 @@ export class ActivityAuth extends LitElement {
   }
 
   render() {
-    console.log('render', this.account);
     return html`
       ${this.renderDrawer()}
       ${this.renderAvatar()}

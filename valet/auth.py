@@ -32,6 +32,7 @@ async def get_maybe_account(request: Request, token: Token):
         account_id = claims['sub']
     else:
         account_id = request.session.get('account')
+    print('account', account_id)
     return await load_account(account_id)
     
 async def get_verified_account(request: Request, token: Token):
@@ -79,7 +80,6 @@ async def get_or_create_account(provider: str, token: dict):
                           name=user_info.get('name'),
                           email=user_info.get('email'), 
                           image=user_info.get('picture'))
-        print(account)
         await storage.store(account, index='accounts')
         return account
     return account

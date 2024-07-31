@@ -14,6 +14,7 @@ export class ActivityCard extends LitElement {
       font-size: 1rem;
       height: 64px;
       align-items: center;
+      min-width: 300px;
     }
 
     .container {

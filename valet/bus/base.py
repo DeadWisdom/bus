@@ -18,7 +18,6 @@ class Forbidden(Exception):
 storage: ContextVar[ElasticStorage] = ContextVar("var", default=ElasticStorage())
 stock: dict[str, Object] = {}
 
-
 class Bus:
     identity: str
 
@@ -95,7 +94,7 @@ class Bus:
         if (url.path == '/'):
             return False
 
-        collection = await self.dereference(url.parent)
+        collection = await self.dereference(url.parent or '/')
         if collection is None:
             return False
         return await self.can_read(collection)
@@ -109,7 +108,7 @@ class Bus:
 
         if self.identity == 'sys':
             return True
-
+        
         object = await self.dereference(url)
         
         if object and self.identity in gather_ids(object.attributed_to):
@@ -144,6 +143,8 @@ def get_url(node: Node):
             raise ValueError(f"Node is {node!r}")
     if url.path == '/':
         return url
+    if not url.host:
+        return URL(url.path)
     return url.origin().with_path(url.path)
 
 def get_id(node: Node):

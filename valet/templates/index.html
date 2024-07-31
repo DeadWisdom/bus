@@ -26,11 +26,7 @@
 
 <body>
 
-  {% if account %}
-  <activity-auth data-account="{{account}}"></activity-auth>
-  {% else %}
-  <activity-auth></activity-auth>
-  {% endif %}
+  <activity-auth data-account="{{json64(account)}}"></activity-auth>
 
   {% block body %}
   <header class="hero">
@@ -56,13 +52,9 @@
     <section class="stack">
       <h2>Favorites</h2>
 
-      <activity-card href="/collections/michelin-star">
-        <div slot="headline">Michelin Star Restaurants</div>
-        <div slot="supporting-text">The very top Chicago restaurants, divined upon us by a tire company</div>
-      </activity-card>
-      <activity-card href="/collections/food-deserts">
-        <div slot="headline">Food Deserts</div>
-        <div slot="supporting-text">Areas with limited access to affordable or nutritious food</div>
+      <activity-card href="/accounts">
+        <div slot="headline">Accounts</div>
+        <div slot="supporting-text">All user accounts</div>
       </activity-card>
     </section>
 

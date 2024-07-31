@@ -1,0 +1,7 @@
+{% extends "index.html" %}
+
+{% block body %}
+<code>
+    {{ object.model_dump_json() }}
+  </code>
+{% endblock %}
