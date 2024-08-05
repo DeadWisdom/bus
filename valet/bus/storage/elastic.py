@@ -16,13 +16,13 @@ class SortOrder(str, Enum):
 
 
 class Query(BaseModel):
-    text: str | dict[str, str] = None
-    keywords: dict[str, str] = None
-    sort: dict[str, SortOrder] | list[dict[str, SortOrder]] | None = [{"updated": "desc"}, {"id": "asc"}]
+    text: str | dict[str, str] | None = None
+    keywords: dict[str, str] | None = None
+    sort: dict[str, SortOrder] | list[dict[str, SortOrder]] | None = [{"updated": SortOrder.desc}, {"id": SortOrder.asc}]
     size: int = 42
     after: Any = None
-    collection: str = None
-    type: str = None
+    collection: str | None = None
+    type: str | None = None
 
     def gather_keywords(self):
         keywords = dict(self.keywords or {})
@@ -171,7 +171,7 @@ class ElasticStorage:
     async def setup(self):
         for name, mappings in INDEXES.items():
             print(f"  {self.prefix + name:<30}... ", end="")
-            await self.client.indices.create(index=self.prefix + name, mappings=mappings, ignore=400)
+            await self.client.indices.create(index=self.prefix + name, mappings=mappings)
             print("✅")
 
     async def clear_if_testing(self):

@@ -1,4 +1,5 @@
-import base64, orjson
+import base64
+import orjson
 from typing import Annotated
 from yarl import URL
 from fastapi import FastAPI, Request, HTTPException, Depends
@@ -10,8 +11,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from pydantic import BaseModel
 
-from . import logging
-from .bus import Activity, Object, Collection, gather_ids, first, Forbidden, stock, Worker
+from .bus import Activity, Object, Collection, first, Forbidden, stock, Worker
 from .bus import Bus as _Bus
 from .auth import router as auth, MaybeAccount, VerifiedAccount
 
@@ -23,10 +23,10 @@ def json64(obj):
     return base64.b64encode(orjson.dumps(obj)).decode()
 
 def get_bus(account: MaybeAccount):
-    return Bus(account.id if account else None)
+    return _Bus(account.id if account else None)
 
 def get_authenticated_bus(account: VerifiedAccount):
-    return Bus(account.id)
+    return _Bus(account.id)
 
 Bus = Annotated[_Bus, Depends(get_bus)]
 AuthenticatedBus = Annotated[_Bus, Depends(get_authenticated_bus)]
