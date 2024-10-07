@@ -10,3 +10,5 @@ class Settings(BaseSettings):
 
     google_oauth_client: str = ""
     google_oauth_secret: str = ""
+
+    disable_caching: bool = False

@@ -1,15 +1,80 @@
-:root {
+:root{
+  --color-primary: rgb(6 103 127);
+  --color-surface-tint: rgb(6 103 127);
+  --color-on-primary: rgb(255 255 255);
+  --color-primary-container: rgb(182 234 255);
+  --color-on-primary-container: rgb(0 31 40);
+  --color-secondary: rgb(76 98 106);
+  --color-on-secondary: rgb(255 255 255);
+  --color-secondary-container: rgb(207 230 241);
+  --color-on-secondary-container: rgb(7 30 38);
+  --color-tertiary: rgb(90 92 126);
+  --color-on-tertiary: rgb(255 255 255);
+  --color-tertiary-container: rgb(224 224 255);
+  --color-on-tertiary-container: rgb(23 25 55);
+  --color-error: rgb(186 26 26);
+  --color-on-error: rgb(255 255 255);
+  --color-error-container: rgb(255 218 214);
+  --color-on-error-container: rgb(65 0 2);
+  --color-background: rgb(245 250 253);
+  --color-on-background: rgb(23 28 31);
+  --color-surface: rgb(245 250 253);
+  --color-on-surface: rgb(23 28 31);
+  --color-surface-variant: rgb(219 228 232);
+  --color-on-surface-variant: rgb(64 72 76);
+  --color-outline: rgb(112 120 124);
+  --color-outline-variant: rgb(191 200 204);
+  --color-shadow: rgb(0 0 0);
+  --color-scrim: rgb(0 0 0);
+  --color-inverse-surface: rgb(44 49 52);
+  --color-inverse-on-surface: rgb(237 241 244);
+  --color-inverse-primary: rgb(136 209 235);
+  --color-primary-fixed: rgb(182 234 255);
+  --color-on-primary-fixed: rgb(0 31 40);
+  --color-primary-fixed-dim: rgb(136 209 235);
+  --color-on-primary-fixed-variant: rgb(0 78 96);
+  --color-secondary-fixed: rgb(207 230 241);
+  --color-on-secondary-fixed: rgb(7 30 38);
+  --color-secondary-fixed-dim: rgb(179 202 212);
+  --color-on-secondary-fixed-variant: rgb(52 74 82);
+  --color-tertiary-fixed: rgb(224 224 255);
+  --color-on-tertiary-fixed: rgb(23 25 55);
+  --color-tertiary-fixed-dim: rgb(195 195 235);
+  --color-on-tertiary-fixed-variant: rgb(66 68 101);
+  --color-surface-dim: rgb(214 219 222);
+  --color-surface-bright: rgb(245 250 253);
+  --color-surface-container-lowest: rgb(255 255 255);
+  --color-surface-container-low: rgb(239 244 247);
+  --color-surface-container: rgb(234 239 241);
+  --color-surface-container-high: rgb(228 233 236);
+  --color-surface-container-highest: rgb(222 227 230);
+  
+  --space: 8px;
+  --space-half: 4px;
+  --space-extra: 16px;
+  --border-radius: 5px;
+  --width-content: 32rem;
+}
+
+old {
   --color-surface: #fff;
   --color-on-surface: #111;
   --color-on-surface-variant: #555;
   --color-surface-container: #f0f0f0;
+  --color-secondary-container: #c8d2d4;
   --color-on-surface-container: #111;
   --color-primary: #3fb7e7;
-  --color-primary-on-surface: #036a92;
+  --color-primary: #036a92;
+  --color-secondary-on-surface: #32a852;
   --color-on-primary: #111;
+  --color-on-primary-on-surface: white;
+  --color-on-secondary-on-surface: white;
+  --color-container-inverse: var(--sl-color-neutral-600);
+  --color-container-on-inverse: var(--sl-color-neutral-0);
   --color-outline: #444;
+}
 
-  --space: 8px;
+:root {
 }
 
 body {
@@ -18,7 +83,8 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 16px;
   font-size: calc(.333vw + 1em);
-  color: var(--color-on-surface)
+  color: var(--color-on-surface-container);
+  background-color: var(--color-surface-container);
 }
 
 .stack {
@@ -27,9 +93,18 @@ body {
   gap: var(--space);
 }
 
+.tight.stack {
+  gap: var(--space-half);
+}
+
+.container {
+  background-color: var(--color-surface-container);
+  color: var(--color-on-surface);
+}
+
 a {
   text-decoration: underline;
-  color: var(--color-primary-on-surface);
+  color: var(--color-primary);
 }
 
 activity-card:not(:defined) {
@@ -90,10 +165,11 @@ activity-search form {
 input[type=search] {
   flex-grow: 1;
   line-height: 1.5;
-  border: 1px solid var(--color-outline);
+  border: none;
   border-radius: 2rem;
   padding: .5rem 1rem;
   width: auto;
+  background-color: var(--color-secondary-container);
 }
 
 button[type=submit] {
@@ -118,23 +194,114 @@ hr {
 }
 
 
-main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  padding: calc(1rem + 3vw) calc(1rem + 3vw) calc(3vw);
-  min-width: 280px;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  gap: var(--space);
+
+.headline {
+  margin-bottom: 0;
 }
 
-h2 {
+.supporting-text {
   font-size: 1.2rem;
   text-transform: uppercase;
   font-weight: bold;
   color: var(--color-on-surface);
   max-width: 42ch;
   margin: 0;
+  margin-top: -10px;
+}
+
+/* Layouts */
+main.details {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  min-height: 100vh;
+  align-items: stretch;
+  flex-direction: row;
+  max-width: none;
+}
+
+main.details {
+  padding: 1rem 1rem;
+  flex-grow: 1;
+  border-radius: var(--border-radius);
+  margin: 2px 2px var(--space) var(--space);
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+h1, .headline {
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: var(--color-on-surface);
+  margin-top: 0;
+}
+
+.supporting-text {
+  font-size: 1.2rem;
+  font-weight: normal;
+  color: var(--color-on-surface);
+  text-transform: none;
+}
+
+activity-card sl-icon {
+  font-size: 1.5rem;
+}
+
+sl-badge::part(bases) {
+  border-radius: var(--border-radius);
+  background-color: var(--color-primary);
+  border: none;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space);
+  min-height: 36px;
+}
+
+sl-badge::part(base) {
+  border: none;
+}
+
+sl-badge[variant=primary]::part(base) {
+  background-color: var(--color-primary);
+}
+
+sl-badge[variant=success]::part(base) {
+  background-color: var(--color-secondary-on-surface);
+}
+
+.field {
+  max-width: 43ch;
+}
+
+h2 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+article {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  padding-bottom: 20vh;
+}
+
+article[hidden] {
+  display: none;
+}
+
+.form {
+  max-width: var(--width-content);
+}
+
+code.json {
+  display: block;
+  white-space: pre-wrap;
+  background-color: var(--color-surface);
+  padding: var(--space);
+  border-radius: var(--border-radius);
 }

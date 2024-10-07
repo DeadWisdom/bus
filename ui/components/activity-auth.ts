@@ -1,4 +1,4 @@
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, type PropertyValueMap } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import '@shoelace-style/shoelace/dist/components/avatar/avatar.js';
@@ -7,6 +7,9 @@ import { first, type ActivityObject } from '../bus/objects';
 
 @customElement('activity-auth')
 export class ActivityAuth extends LitElement {
+  @property({ type: Boolean })
+  authenticated?: boolean = false;
+
   @property({ type: Object })
   account?: ActivityObject;
 
@@ -17,9 +20,6 @@ export class ActivityAuth extends LitElement {
     sl-avatar {
       cursor: pointer;
       --size: 36px;
-      position: absolute;
-      top: 10px;
-      right: 10px;
     }
 
     .stack {
@@ -54,15 +54,24 @@ export class ActivityAuth extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    if (this.dataset.account) {
-      this.account = JSON.parse(atob(this.dataset.account));
-      console.log('signed in as', this.account);
+    if (this.authenticated) {
+      let raw = sessionStorage.getItem('account');
+      if (raw) this.onAccountInfo(JSON.parse(raw));
+      else fetch('/auth/account').then(r => r.json()).then(this.onAccountInfo);
     }
+  }
+
+  onAccountInfo = (account: ActivityObject) => {
+    console.log('authenticated', account);
+    this.account = account;
+    this.authenticated = true;
+    sessionStorage.setItem('account', JSON.stringify(account));
   }
 
   onLogout = () => {
     fetch('/auth/logout', { method: 'GET' });
     this.account = undefined;
+    this.authenticated = false;
   }
 
   showDrawer = () => {
@@ -107,7 +116,7 @@ export class ActivityAuth extends LitElement {
 
   renderAnonDrawer() {
     return html`<sl-drawer label="Who Dis?">
-      <sl-button href="/auth/google/login" variant="primary">Login with Google</sl-button>
+      <sl-button href="/auth/google/login" variant="primary" rel="noreferrer noopener external">Login with Google</sl-button>
     </sl-dawer>`;
   }
 }

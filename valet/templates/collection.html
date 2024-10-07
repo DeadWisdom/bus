@@ -1,7 +1,34 @@
 {% extends "index.html" %}
 
 {% block body %}
+
+
+<main class="stack">
+  <h1 class="headline">{{first(collection.name, collection.id)}}</h1>
+  <section class="stack">
+    <h2>{{first(collection.summary)}}</h2>
+
+    {% for item in collection.items %}
+    <activity-card href="{{item.id}}">
+      <div slot="headline">{{first(item.name, item.id)}}</div>
+      <div slot="supporting-text">{{first(item.summary)}}</div>
+    </activity-card>
+    {% endfor %}
+  </section>
+  <section class="stack">
+    <h2>Schemas</h2>
+
+    {% for view in schemas.values() %}
+    <activity-card href="/ns/{{view.schema.name}}">
+      <div slot="headline">{{first(view.schema.name)}}</div>
+      <div slot="supporting-text">{{first(view.schema.description)}}</div>
+    </activity-card>
+    {% endfor %}
+  </section>
+</main>
+<hr>
 <code>
-    {{ object.model_dump_json() }}
-  </code>
+    {{ collection.model_dump_json() }}
+
+</code>
 {% endblock %}

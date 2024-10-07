@@ -32,7 +32,6 @@ async def get_maybe_account(request: Request, token: Token):
         account_id = claims['sub']
     else:
         account_id = request.session.get('account')
-    print('account', account_id)
     return await load_account(account_id)
     
 async def get_verified_account(request: Request, token: Token):
@@ -89,6 +88,11 @@ async def delete_account(account_id: str):
 
 ## Endpoints ##
 router = APIRouter()
+
+@router.get("/account")
+async def account(account: VerifiedAccount):
+    return account
+
 
 @router.get("/google/login")
 async def login_google(request: Request):

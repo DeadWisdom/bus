@@ -1,0 +1,58 @@
+<div class="list stack">
+  <activity-search>
+    <form action="." method="get">
+      <input autocomplete="off" autocapitalize="off" type="search" placeholder="Search elements"> <button
+        aria-label="Submit" type="submit"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+          width="24px" fill="#5f6368">
+          <path
+            d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+        </svg></button>
+    </form>
+  </activity-search>
+  <activity-card href="#">
+    <sl-icon slot="start" name="{{get_icon(view.schema, 'collection')}}"></sl-icon>
+    <div slot="headline">{{view.schema.title or view.schema.name}}</div>
+    {% if view.schema.annotations.summary %}
+    <div slot="supporting-text"> {{view.schema.annotations.summary.value}}</div>
+    {% endif %}
+    <sl-badge slot="end" variant="success">schema</sl-badge>
+  </activity-card>
+  {% for cls in view.all_classes().values() %}
+  <activity-card href="#{{cls.name}}">
+    <sl-icon slot="start" name="{{get_icon(cls, 'card-text')}}"></sl-icon>
+    <div slot="headline">{{cls.title or cls.name}}</div>
+    {% if cls.annotations.summary %}
+    <div slot="supporting-text"> {{cls.annotations.summary.value}}</div>
+    {% endif %}
+    {% if cls.mixin %}
+    <sl-badge slot="end" variant="warning">mixin</sl-badge>
+    {% elif cls.abstract %}
+    <sl-badge slot="end" variant="warning">abstract</sl-badge>
+    {% else %}
+    <sl-badge slot="end" variant="primary">class</sl-badge>
+    {% endif %}
+  </activity-card>
+  {% endfor %}
+</div>
+
+
+{% for cls in view.all_classes().values() %}
+<article data-key="{{cls.name}}">
+  <a name="{{cls.name}}"></a>
+  <div class=" class">
+    {{cls.name}}
+  </div>
+  <ul class="slots">
+    {% for slot in cls.slots %}
+    <li>{{slot}}</li>
+    {% endfor %}
+  </ul>
+  {% if cls.attributes %}
+  <ul class="slots">
+    {% for slot in cls.attributes.values() %}
+    <li>{{slot.name}}: {{slot.range}}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</article>
+{% endfor %}

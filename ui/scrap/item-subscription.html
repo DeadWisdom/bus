@@ -1,0 +1,27 @@
+<schema-item class="class element" itemscope itemid="/ns/personinfo/Person"
+  itemtype="https://w3id.org/linkml/ClassDefinition">
+  <a href="/ns/personinfo/Person">
+    <sl-icon class="icon" name="person-circle" aria-hidden="true" library="default"></sl-icon>
+    <span class="name" itemprop="name">Person</span>
+  </a>
+</schema-item>
+
+<schema-item class="slot element" itemscope itemid="/ns/personinfo/id"
+  itemtype="https://w3id.org/linkml/SlotDefinition">
+  <a href="/ns/personinfo/id">
+    <sl-icon class="icon" name="key" aria-hidden="true" library="default"></sl-icon>
+    <span class="name" itemprop="name">id</span>
+    <span class="range" itemprop="range">string</span>
+    <span class="identifier tag">ID</span>
+  </a>
+</schema-item>
+
+<script type="module">
+  class SchemaItem {
+    sub = new ItemSubscription();
+
+    render() {
+      return this.sub.render(this.renderItem);
+    }
+  }
+</script>

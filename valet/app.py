@@ -1,36 +1,50 @@
-import base64
-import orjson
 from typing import Annotated
-from yarl import URL
-from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.responses import HTMLResponse
+
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import HTMLResponse, ORJSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import ORJSONResponse, HTMLResponse
-from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from pydantic import BaseModel
+from yarl import URL
 
-from .bus import Activity, Object, Collection, first, Forbidden, stock, Worker
+from .auth import MaybeAccount, VerifiedAccount
+from .auth import router as auth
+from .bus import Activity
 from .bus import Bus as _Bus
-from .auth import router as auth, MaybeAccount, VerifiedAccount
+from .bus import Collection, Forbidden, Object, Worker, first, stock
+from .schemas import (ClassDefinition, EnumDefinition, SchemaDefinition,
+                      SlotDefinition, schemas)
+from .templates import Templates
 
-def json64(obj):
-    if obj is None:
-        return ''
-    if isinstance(obj, BaseModel):
-        return base64.b64encode(obj.model_dump_json().encode()).decode()
-    return base64.b64encode(orjson.dumps(obj)).decode()
+def get_definition_template(obj):
+    if isinstance(obj, SchemaDefinition):
+        return 'parts/schema.html'
+    if isinstance(obj, ClassDefinition):
+        return 'parts/class.html'
+    if isinstance(obj, SlotDefinition):
+        return 'parts/slot.html'
+    if isinstance(obj, EnumDefinition):
+        return 'parts/enum.html'
+    else:
+        raise ValueError("Object type not recognized")
 
+def wants_html(request: Request):
+    accept_header = request.headers.get("Accept")
+    return accept_header.startswith('text/html')
+
+
+### Dependencies
 def get_bus(account: MaybeAccount):
     return _Bus(account.id if account else None)
 
 def get_authenticated_bus(account: VerifiedAccount):
     return _Bus(account.id)
 
+
 Bus = Annotated[_Bus, Depends(get_bus)]
 AuthenticatedBus = Annotated[_Bus, Depends(get_authenticated_bus)]
-
+HTMLAccept = Annotated[bool, Depends(wants_html)]
 
 app = FastAPI(default_response_class=ORJSONResponse)
 
@@ -42,14 +56,16 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.include_router(auth, prefix="/auth")
 
 ## Templates & Static
-app.mount("/ui", StaticFiles(directory="./build/ui"), name="ui")
-templates = Jinja2Templates(directory="valet/templates")
-templates.env.globals['json64'] = json64
+def load_snippet(filename, name):
+    with open(f'ui/snippets/{filename}.ts') as f:
+        return f.read()
 
+
+app.mount("/ui", StaticFiles(directory="./build/ui"), name="ui")
 
 ## Stock Collections ##
 stock['/'] = Collection(id='/', type='Collection', attributed_to="/accounts/TQSdRqi6", audience="public")
-stock['/accounts'] = Collection(id='/accounts', type='Collection', attributed_to="/accounts/TQSdRqi6", audience="private")
+stock['/accounts'] = Collection(id='/accounts', type=['Collection', 'Accounts'], attributed_to="/accounts/TQSdRqi6", audience="private")
 
 
 def json_ld_response(obj: Object, media_type='application/ld+json; profile="https://www.w3.org/ns/activitystreams', status_code=200, **kwargs):
@@ -71,27 +87,53 @@ async def derefernce_or_404(bus: _Bus, url: str | URL) -> Object:
     return obj
 
 
-class TemplateRender:
-    request: Request
-    account: MaybeAccount | None
-
-    def __init__(self, request: Request, account: MaybeAccount):
-        self.request = request
-        self.account = account
-    
-    def render(self, name: str, context: dict = {}):
-        context = dict(context)
-        context.setdefault('account', self.account)
-        return templates.TemplateResponse(request=self.request, name=name, context=context)
-
-Templates = Annotated[TemplateRender, Depends(TemplateRender)]
-
 ## UI ##
 @app.get("/")
 async def index(template: Templates, response_class=HTMLResponse):
     return template.render("index.html")
 
 
+@app.get("/ns")
+async def namespace(bus: Bus, template: Templates):
+    items = [
+        Object(id=f'/ns/bus', type='Schema', name="Activity Bus", summary="The schema that drives this system"),
+        Object(id=f'/ns/activitystrems', type='Schema', name="Activity Streams 2.0", summary="From the Activity Vocabulary", url="https://www.w3.org/TR/activitystreams-vocabulary"),
+        Object(id=f'/ns/linkml', type='Schema', name="LinkML Model", summary="Metamodels of the Linked Data Modeling Language framework ", url="https://w3id.org/linkml/"),
+        Object(id=f'/ns/schema_org', type='Schema', name="Schema.org", summary="A treasure trove of community made schemas from Schema.org", url="https://schema.org"),
+    ]
+    attributed_to = await bus.dereference('/accounts/TQSdRqi6')
+    collection = Collection(
+        id='/ns', 
+        name="Schemas",
+        summary="All system schemas",
+        type='Collection', 
+        attributed_to=attributed_to, 
+        audience="public",
+        items=items)
+    return template.render("collection.html", context={'collection': collection, 'schemas': schemas})
+
+
+@app.get("/ns/{name}")
+async def namespace_detail(name: str, bus: Bus, template: Templates, request: Request, html: HTMLAccept):
+    view = schemas.get(name)
+    if view is None:
+        raise HTTPException(status_code=404, detail="Schema not found")
+    if html:
+        return template.render("schema.html", context={'view': view, 'schema': view.schema, 'element': None, 'uri': f'/ns/{name}'})
+    return items(view.schema)
+
+
+@app.get("/ns/{schema_name}/{element_name}")
+async def element_detail(schema_name: str, element_name: str, bus: Bus, template: Templates, request: Request, html: HTMLAccept):
+    view = schemas.get(schema_name)
+    if view is None:
+        raise HTTPException(status_code=404, detail="Schema not found")
+    element = view.get_element(element_name)
+    if element is None:
+        raise HTTPException(status_code=404, detail="Schema not found")
+    if html:
+        return template.render("schema.html", context={'view': view, 'schema': view.schema, 'element': element, 'template': get_definition_template(element), 'uri': f'/ns/{schema_name}/{element_name}'})
+    return items(element)
 
 ## General ##
 @app.put("/{_:path}")
@@ -115,7 +157,8 @@ async def put(_: str, object: Object, request: Request, bus: AuthenticatedBus):
 @app.get("/{_:path}")
 async def get(_: str, request: Request, templates: Templates, bus: Bus) -> Object:
     object = await derefernce_or_404(bus, request.url)
-
+    
+    context = {}
     if ('Collection' in object.type):
         object = Collection.model_validate(object.model_dump())
         page = await bus.load_collection_page(object.id)
@@ -124,12 +167,13 @@ async def get(_: str, request: Request, templates: Templates, bus: Bus) -> Objec
         object.next = page.next
         object.total_items = page.total_items
         template_name = 'collection.html'
+        context['collection'] = object
     else:
         template_name = 'resource.html'
+        context['object'] = object
     
-    accept_header = request.headers.get("Accept")
-    if accept_header.startswith('text/html'):
-        return templates.render(template_name, {'object': object})
+    if wants_html(request):
+        return templates.render(template_name, context=context)
 
     return json_ld_response(object)
 
@@ -138,5 +182,4 @@ async def get(_: str, request: Request, templates: Templates, bus: Bus) -> Objec
 @app.exception_handler(Forbidden)
 async def forbidden_exception_handler(request: Request, exc: Forbidden):
     return HTMLResponse(status_code=403, content="Forbidden")
-
 

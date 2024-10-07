@@ -1,0 +1,13 @@
+{% set class = element %}
+
+<main>
+  <h2 class="headline"><sl-icon name="{{ get_icon(class, 'card-heading') }}"></sl-icon>{{ class.name }}</h2>
+  <sl-badge variant="primary">class</sl-badge>
+  <h3>Extends</h3>
+  <div class="row">
+    {% for mixin in class.mixins %}
+    <sl-button href="./{{mixin}}">{{mixin}}</sl-button>
+    {% endfor %}
+  </div>
+  <code>{{ items(class) }}</code>
+</main>

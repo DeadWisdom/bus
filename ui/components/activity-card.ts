@@ -7,26 +7,35 @@ export class ActivityCard extends LitElement {
     :host {
       display: flex;
       flex-direction: row;
-      max-width: 600px;
+      max-width: var(--width-content, 600px);
       background-color: var(--color-surface-container);
       color: var(--color-on-surface-container);
-      padding: var(--space);
+      padding: 0 var(--space);
       font-size: 1rem;
       height: 64px;
       align-items: center;
       min-width: 300px;
+      border-radius: var(--border-radius);
+    }
+
+    :host([tight]) {
+      --space: 4px;
+      height: 42px;
+      font-size: .8rem;
     }
 
     .container {
       display: flex;
       flex-direction: column;
-      gap: var(--space);
       margin: var(--space);
+      flex-grow: 1;
+      flex-shrink: 1;
+      overflow: hidden;
     }
 
     .headline {
-      font-size: 1.3rem;
-      line-height: 1.1;
+      font-size: 1.3em;
+      line-height: 1.2;
       display: block;
       color: currentColor;
       text-decoration: none;
@@ -34,10 +43,12 @@ export class ActivityCard extends LitElement {
     }
 
     .supporting-text {
+      white-space: nowrap;
+      font-size: .8em;
     }
 
-    :host([href]:hover) {
-      outline: var(--color-on-surface) solid 2px;
+    :host(:hover) {
+      background-color: var(--color-secondary-container);
       cursor: pointer;
     }
 
@@ -47,9 +58,14 @@ export class ActivityCard extends LitElement {
       box-shadow: inset var(--color-on-surface) 0 0 0 1px;
     }
 
-    :host([href]:hover) {
-      outline: var(--color-on-surface) solid 2px;
-      cursor: pointer;
+    .start, .end {
+      padding: 0 var(--space);
+      padding-top: 3px;
+      flex-shrink: 0;
+    }
+
+    .end {
+      font-size: .8rem;
     }
   `;
 
@@ -62,19 +78,32 @@ export class ActivityCard extends LitElement {
   @property()
   variant = "default";
 
+  @property({ type: Boolean, reflect: true })
+  tight: boolean = false
+
   connectedCallback(): void {
     super.connectedCallback();
     this.addEventListener('click', this.onClick);
   }
 
   onClick = (e: MouseEvent) => {
-    console.log(e);
     if (!this.href) return;
     if (window.getSelection()?.toString()) return;
 
     e.preventDefault();
 
     (this.shadowRoot!.querySelector('a.headline') as HTMLElement).click();
+  }
+
+  onSlotChange = (e: Event) => {
+    let slot = this.shadowRoot!.querySelector("slot[name='start']") as HTMLSlotElement;
+    if (!slot) return;
+    let nodes = slot.assignedNodes();
+    if (nodes.length > 0) {
+      this.classList.add('has-start');
+    } else {
+      this.classList.remove('has-start');
+    }
   }
 
   renderHeadline() {
@@ -88,7 +117,7 @@ export class ActivityCard extends LitElement {
 
   render() {
     return html`
-      <div class="start" part="start">
+      <div class="start" part="start" @slotchange=${this.onSlotChange}>
         <slot name="start"></slot>
       </div>
       <div class="container" part="container">
@@ -96,6 +125,9 @@ export class ActivityCard extends LitElement {
         <div class="supporting-text" part="supporting-text">
           <slot name="supporting-text"></slot>
         </div>
+      </div>
+      <div class="end" part="start" @slotchange=${this.onSlotChange}>
+        <slot name="end"></slot>
       </div>
     </div>
     `;
